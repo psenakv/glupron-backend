@@ -10,7 +10,10 @@
         "server-watch": "onchange -i \"./src/**/*.{ts,tsx,json}\" -- npm run server",
         "expose": "lt --port 3000 --subdomain shh-backend",
         "test": "jest --runInBand --setupFiles dotenv/config",
-        "test-watch": "npm run test -- --watch"
+        "test-watch": "npm run test -- --watch",
+        "preversion": "npm run test",
+        "postversion": "git push && git push --tags && npm run deploy",
+        "deploy": "git push heroku"
     },
     "dependencies": {
         "@types/cors": "^2.8.5",

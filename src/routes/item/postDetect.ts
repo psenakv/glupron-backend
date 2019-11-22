@@ -15,7 +15,7 @@ export async function postDetect(
 ): Promise<IPostDetectResponse> {
     return {
         data: {
-            glucoseValue: Math.random() * 10,
+            glucoseValue: 15.9,
         },
     };
 }

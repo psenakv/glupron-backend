@@ -1,4 +1,5 @@
 import * as request from 'supertest';
+import * as assert from 'assert';
 import { createApp } from '../src/createApp';
 import { _GLUCKOMETER1 } from './_GLUCKOMETER1';
 
@@ -10,5 +11,7 @@ export default describe('Detection route', () => {
             .post(`/detect`)
             .send(_GLUCKOMETER1)
             .expect(200)
-            .expect((response) => response.body.data.glucoseValue === 15.9));
+            .then((response) => {
+                assert.equal(response.body.data.glucoseValue, 15.9);
+            }));
 });

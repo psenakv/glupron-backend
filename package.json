@@ -3,7 +3,7 @@
     "version": "0.2.0",
     "private": false,
     "scripts": {
-        "start": "npm start server",
+        "start": "npm run server",
         "prettier": "prettier --config .prettierrc --write \"{src,static}/**/*.{ts,tsx,js,css,html}\" webpack.config.js",
         "prettier-watch": "onchange \"**/*.{js,ts,tsx,json,css,html}\" -- prettier --config .prettierrc --write \"{{changed}}\"",
         "server": "clear & clear & export TZ=\"Europe/Amsterdam\"; ts-node -P ./tsconfig.json -r dotenv/config src/index.ts",

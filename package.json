@@ -1,6 +1,6 @@
 {
     "name": "shh-backend",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "private": false,
     "scripts": {
         "start": "npm run server",
@@ -41,6 +41,5 @@
         "prettier": "^1.12.1",
         "supertest": "^4.0.2",
         "ts-jest": "^24.0.2"
-
     }
 }

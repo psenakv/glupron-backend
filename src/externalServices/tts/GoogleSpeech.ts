@@ -1,28 +1,39 @@
-import { SPEECH_GOOGLE_API_URL_WITH_KEY } from './../../config';
+import { GOOGLE_APIKEY } from './../../config';
+
 import { ISpeechProvider } from './ISpeechProvider';
+import * as fetch from 'isomorphic-fetch';
 
 /**
  * This class provides access to Google cloud TTS service
  */
-export class GoogleSpeechProvider implements ISpeechProvider {
-    async getAudio(ssml: string, $external = false): Promise<string> {
+export class GoogleSpeech implements ISpeechProvider {
+    async getAudio(ssml: string): Promise<string> {
         try {
-            const data = {
+            const requestData = {
                 input: { ssml },
 
                 voice: {
                     // todo to config //choose from https://cloud.google.com/text-to-speech/docs/voices
                     languageCode: 'en-GB-Standard-D',
                 },
-                audioConfig: { audioEncoding: 'MP3', speaking_rate: 1 },
+                audioConfig: {
+                    audioEncoding: 'MP3',
+                    speaking_rate: 1,
+                },
             };
 
-            const response = await fetch(SPEECH_GOOGLE_API_URL_WITH_KEY);
+            const response = await fetch(
+                `https://content-texttospeech.googleapis.com/v1beta1/text:synthesize?key=${GOOGLE_APIKEY}`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(requestData),
+                },
+            );
             const body = await response.json();
 
             const audioContent = body.audioContent;
 
-            return audioContent;
+            return `data:audio/mp3;base64,${audioContent}`;
         } catch (error) {
             console.error(error);
             throw new Error(
@@ -82,3 +93,5 @@ export class GoogleSpeechProvider implements ISpeechProvider {
 		*/
     }
 }
+
+export const googleSpeech = new GoogleSpeech();

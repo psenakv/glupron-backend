@@ -12,6 +12,7 @@ import {
     createRouteHandler,
     createRouteHandlerWithRequest,
 } from './tools/createRouteHandler';
+//import { filesLibrary } from './FilesLibrary';
 
 export function createApp(): express.Express {
     const app = express();
@@ -35,6 +36,13 @@ export function createApp(): express.Express {
             IPostDetectResponse
         >(postDetect),
     );
+
+    /*
+    app.get('/files/:uuid', (request, response) => {
+        const file = filesLibrary.getFile(request.params.uuid);
+        response.send(file);
+    });
+    */
 
     return app;
 }

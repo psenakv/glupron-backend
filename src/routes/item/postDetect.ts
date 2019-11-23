@@ -5,6 +5,7 @@ import { googleSpeech } from '../../externalServices/tts/GoogleSpeech';
 export interface IPostDetectRequest {
     gluckometerImage: string;
     language: 'cs' | 'en';
+    //formats: ('URL' | 'BASE64' | 'RAW')[];
 }
 
 export interface IPostDetectResponse
@@ -25,41 +26,42 @@ export async function postDetect(
     query: void,
     request: IPostDetectRequest,
 ): Promise<IPostDetectResponse> {
-    const text = await ocrSpace.getTexts(request.gluckometerImage);
+    const { values, raw } = await ocrSpace.getValues(request.gluckometerImage);
 
-    const mp3 = await googleSpeech.getAudio(`
+    let text: string = 'Chyba';
+
+    if (values.length > 1) {
+        text = `Nalezeno více než 1 text. A to ${values.join(' a ')}`;
+    } else if (values.length === 0) {
+        text = `Naskenujte znovu`;
+    } else if (values.length === 1) {
+        text = `${values[0]} je hodnota vaší glykémie.`;
+    }
+
+    const ssml = `
     
     <!-- ?xml version="1.0"? -->
     <speak xmlns="http://www.w3.org/2001/10/synthesis"
         xmlns:dc="http://purl.org/dc/elements/1.1/"
         version="1.0">
-    <metadata>
-        <dc:title xml:lang="en">Telephone Menu: Level 1</dc:title>
-    </metadata>
-
-    <p>
-        <s xml:lang="en-US">
-        <voice name="David" gender="male" age="25">
-            For English, press <emphasis>one</emphasis>.
-        </voice>
-        </s>
-    </p>
-
+            <p>
+                ${text}
+            </p>
     </speak>
-
-    `);
+    `.trim();
+    const mp3 = await googleSpeech.getAudio(ssml);
 
     return {
         data: {
             glucoseValue: 15.9,
             speech: {
-                text: 'ahooooj',
-                ssml: '<xml>....',
+                text,
+                ssml,
                 mp3,
             },
         },
         raw: {
-            ocrParsing: [text],
+            ocrParsing: [raw],
         },
     };
 }

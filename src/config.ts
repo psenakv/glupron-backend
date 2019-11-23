@@ -8,3 +8,4 @@ export const PUBLIC_URL = config
     .url()
     .required().value;
 export const AZURE_APIKEY = config.get('AZURE_APIKEY').required().value;
+export const SPEECH_GOOGLE_API_URL_WITH_KEY = config.get('SPEECH_GOOGLE_API_URL_WITH_KEY').url().required().value;

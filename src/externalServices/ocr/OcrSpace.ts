@@ -6,7 +6,7 @@ import { SPACEOCR_APIKEY } from '../../config';
 export class OcrSpace implements IOcrProvider {
     async getValues(
         image: string,
-    ): Promise<{ values: null | number[]; raw: any }> {
+    ): Promise<{ values: null | number[]; raw: any[] }> {
         //console.log('image', image);
         try {
             //const requestData = new FormData();
@@ -29,7 +29,7 @@ export class OcrSpace implements IOcrProvider {
             if (body.ParsedResults) {
                 for (const parseResult of body.ParsedResults) {
                     for (const piece of parseResult.ParsedText.split(/\s+/m)) {
-                        if (/^[0-9]+(,[0-9]+)?$/g.test(piece)) {
+                        if (/^[0-9]+,[0-9]+$/g.test(piece)) {
                             values.push(
                                 Number.parseFloat(piece.replace(',', '.')),
                             );
@@ -40,7 +40,7 @@ export class OcrSpace implements IOcrProvider {
 
             return {
                 values,
-                raw: body,
+                raw: [body],
             };
         } catch (error) {
             console.error(error);
@@ -57,7 +57,7 @@ export class OcrSpace implements IOcrProvider {
 export const ocrSpace = new OcrSpace();
 
 interface IOcrSpaceParsingResponse {
-    ParsedResults: {
+    ParsedResults?: {
         TextOverlay: {
             Lines: [];
             HasOverlay: false;

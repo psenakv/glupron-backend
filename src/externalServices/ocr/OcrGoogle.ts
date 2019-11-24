@@ -1,3 +1,4 @@
+import { GOOGLE_APIKEY } from './../../config';
 import { IOcrProvider } from './IOcrProvider';
 import * as fetch from 'isomorphic-fetch';
 import * as FormData from 'form-data';
@@ -5,14 +6,14 @@ import * as FormData from 'form-data';
 export class OcrGoogle implements IOcrProvider {
     async getValues(
         image: string,
-    ): Promise<{ values: null | number[]; raw: any }> {
+    ): Promise<{ values: null | number[]; raw: any[] }> {
         //console.log('image', image);
         try {
             const requestData = {
                 requests: [
                     {
                         image: {
-                            content: 'base64-encoded-image',
+                            content: image.split(',')[1],
                         },
                         features: [
                             {
@@ -24,9 +25,10 @@ export class OcrGoogle implements IOcrProvider {
             };
 
             const response = await fetch(
-                `https://vision.googleapis.com/v1/images:annotate`,
+                `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_APIKEY}`,
                 {
                     headers: {
+                        //Authorization: GOOGLE_APIKEY, //`Bearer "$(gcloud auth application-default print-access-token)`,
                         //apikey: GOOGLE_APIKEY,
                     },
                     method: 'POST',
@@ -35,17 +37,23 @@ export class OcrGoogle implements IOcrProvider {
             );
             const body: IOcrGoogleParsingResponse = await response.json();
 
-            console.log(body);
-
             const values: number[] = [];
 
-            if (body.ParsedResults) {
-                for (const parseResult of body.ParsedResults) {
-                    for (const piece of parseResult.ParsedText.split(/\s+/m)) {
-                        if (/^[0-9]+(,[0-9]+)?$/g.test(piece)) {
-                            values.push(
-                                Number.parseFloat(piece.replace(',', '.')),
-                            );
+            if (body.responses) {
+                for (const response of body.responses) {
+                    if (response.textAnnotations) {
+                        for (const textAnnotation of response.textAnnotations) {
+                            for (const piece of textAnnotation.description.split(
+                                /\s+/m,
+                            )) {
+                                if (/^[0-9]+,[0-9]+$/g.test(piece)) {
+                                    values.push(
+                                        Number.parseFloat(
+                                            piece.replace(',', '.'),
+                                        ),
+                                    );
+                                }
+                            }
                         }
                     }
                 }
@@ -53,12 +61,10 @@ export class OcrGoogle implements IOcrProvider {
 
             return {
                 values,
-                raw: body,
+                raw: [body],
             };
         } catch (error) {
             console.error(error);
-            /*throw new Error(`Cannot scan image with OcrSpace.`);*/
-
             return {
                 values: null,
                 raw: error.message,
@@ -70,20 +76,10 @@ export class OcrGoogle implements IOcrProvider {
 export const ocrGoogle = new OcrGoogle();
 
 interface IOcrGoogleParsingResponse {
-    ParsedResults: {
-        TextOverlay: {
-            Lines: [];
-            HasOverlay: false;
-            Message: 'Text overlay is not provided as it is not requested';
-        };
-        TextOrientation: '0';
-        FileParseExitCode: 1;
-        ParsedText: string;
-        ErrorMessage: '';
-        ErrorDetails: '';
+    responses?: {
+        textAnnotations?: {
+            locale: string;
+            description: string;
+        }[];
     }[];
-    OCRExitCode: 1;
-    IsErroredOnProcessing: false;
-    ProcessingTimeInMilliseconds: '786';
-    SearchablePDFURL: 'Searchable PDF not generated as it was not requested.';
 }

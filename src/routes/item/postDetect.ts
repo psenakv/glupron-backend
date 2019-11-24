@@ -3,6 +3,7 @@ import { ocrSpace } from './../../externalServices/ocr/OcrSpace';
 import { IResponse } from './../../tools/createRouteHandler';
 import { googleSpeech } from '../../externalServices/tts/GoogleSpeech';
 import { isNull } from 'util';
+import { ocrAggregator } from '../../externalServices/ocr/OcrAggregator';
 
 export interface IPostDetectRequest {
     gluckometerImage: string;
@@ -30,7 +31,9 @@ export async function postDetect(
     query: void,
     request: IPostDetectRequest,
 ): Promise<IPostDetectResponse> {
-    const { values, raw } = await ocrGoogle.getValues(request.gluckometerImage);
+    const { values, raw } = await ocrAggregator.getValues(
+        request.gluckometerImage,
+    );
 
     let text: string = 'Nastala chyba, zkuste prosím vyfotit glukometr znovu.';
 
@@ -64,7 +67,7 @@ export async function postDetect(
     return {
         data: {
             glucoseValue,
-            services: ['OCR.Space', 'Google OCR'],
+            services: ['OCR.Space', 'Google OCR'], //Todo make from real data
             speech: {
                 text,
                 ssml,

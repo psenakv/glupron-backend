@@ -1,28 +1,41 @@
 import { IOcrProvider } from './IOcrProvider';
 import * as fetch from 'isomorphic-fetch';
 import * as FormData from 'form-data';
-import { SPACEOCR_APIKEY } from '../../config';
 
-export class OcrSpace implements IOcrProvider {
+export class OcrGoogle implements IOcrProvider {
     async getValues(
         image: string,
     ): Promise<{ values: null | number[]; raw: any }> {
         //console.log('image', image);
         try {
-            //const requestData = new FormData();
-            //requestData.append('base64Image', image);
+            const requestData = {
+                requests: [
+                    {
+                        image: {
+                            content: 'base64-encoded-image',
+                        },
+                        features: [
+                            {
+                                type: 'TEXT_DETECTION',
+                            },
+                        ],
+                    },
+                ],
+            };
 
-            const response = await fetch(`https://api.ocr.space/parse/image`, {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    apikey: SPACEOCR_APIKEY,
+            const response = await fetch(
+                `https://vision.googleapis.com/v1/images:annotate`,
+                {
+                    headers: {
+                        //apikey: GOOGLE_APIKEY,
+                    },
+                    method: 'POST',
+                    body: JSON.stringify(requestData),
                 },
-                method: 'POST',
-                body: `detectOrientation=true&scale=true&OCREngine=2&base64Image=${encodeURIComponent(
-                    image,
-                )}`,
-            });
-            const body: IOcrSpaceParsingResponse = await response.json();
+            );
+            const body: IOcrGoogleParsingResponse = await response.json();
+
+            console.log(body);
 
             const values: number[] = [];
 
@@ -54,9 +67,9 @@ export class OcrSpace implements IOcrProvider {
     }
 }
 
-export const ocrSpace = new OcrSpace();
+export const ocrGoogle = new OcrGoogle();
 
-interface IOcrSpaceParsingResponse {
+interface IOcrGoogleParsingResponse {
     ParsedResults: {
         TextOverlay: {
             Lines: [];

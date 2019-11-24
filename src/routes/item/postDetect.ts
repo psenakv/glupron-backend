@@ -1,3 +1,4 @@
+import { OcrGoogle, ocrGoogle } from './../../externalServices/ocr/OcrGoogle';
 import { ocrSpace } from './../../externalServices/ocr/OcrSpace';
 import { IResponse } from './../../tools/createRouteHandler';
 import { googleSpeech } from '../../externalServices/tts/GoogleSpeech';
@@ -6,12 +7,14 @@ import { isNull } from 'util';
 export interface IPostDetectRequest {
     gluckometerImage: string;
     language: 'cs' | 'en';
+    noSpeech?: boolean;
     //formats: ('URL' | 'BASE64' | 'RAW')[];
 }
 
 export interface IPostDetectResponse
     extends IResponse<{
         glucoseValue: number | null;
+        services: string[];
         speech: {
             text: string;
             ssml: string;
@@ -27,7 +30,7 @@ export async function postDetect(
     query: void,
     request: IPostDetectRequest,
 ): Promise<IPostDetectResponse> {
-    const { values, raw } = await ocrSpace.getValues(request.gluckometerImage);
+    const { values, raw } = await ocrGoogle.getValues(request.gluckometerImage);
 
     let text: string = 'Nastala chyba, zkuste prosím vyfotit glukometr znovu.';
 
@@ -55,11 +58,13 @@ export async function postDetect(
             </p>
     </speak>
     `.trim();
-    const mp3 = await googleSpeech.getAudio(ssml);
+
+    const mp3 = request.noSpeech ? '' : await googleSpeech.getAudio(ssml);
 
     return {
         data: {
             glucoseValue,
+            services: ['OCR.Space', 'Google OCR'],
             speech: {
                 text,
                 ssml,

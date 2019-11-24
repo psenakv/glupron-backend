@@ -16,7 +16,7 @@ export class GoogleSpeech /*implements ISpeechProvider*/ {
                     // todo to config //choose from https://cloud.google.com/text-to-speech/docs/voices
                     //languageCode: 'cs-CZ-Standard-A',
                     languageCode:
-                        language === 'cz'
+                        language === 'cs'
                             ? 'cs-CZ-Wavenet-A'
                             : 'en-GB-Wavenet-B',
                 },

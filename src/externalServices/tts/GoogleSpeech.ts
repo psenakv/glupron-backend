@@ -14,7 +14,7 @@ export class GoogleSpeech implements ISpeechProvider {
 
                 voice: {
                     // todo to config //choose from https://cloud.google.com/text-to-speech/docs/voices
-                    languageCode: 'en-GB-Standard-D',
+                    languageCode: 'cs-CZ-Wavenet-A',
                 },
                 audioConfig: {
                     audioEncoding: 'MP3',
@@ -35,7 +35,7 @@ export class GoogleSpeech implements ISpeechProvider {
 
             return `data:audio/mp3;base64,${audioContent}`;
         } catch (error) {
-            console.error(error);	
+            console.error(error);
             throw new Error(
                 `Cannot convert ssml into mp3 via GoogleSpeechProvider.`,
             );

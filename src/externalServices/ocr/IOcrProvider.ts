@@ -1,3 +1,5 @@
 export interface IOcrProvider {
-    getValues: (image: string) => Promise<{ values: number[]; raw: any }>;
+    getValues: (
+        image: string,
+    ) => Promise<{ values: null | number[]; raw: any }>;
 }

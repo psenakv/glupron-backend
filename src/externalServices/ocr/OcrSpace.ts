@@ -4,7 +4,9 @@ import * as FormData from 'form-data';
 import { SPACEOCR_APIKEY } from '../../config';
 
 export class OcrSpace implements IOcrProvider {
-    async getValues(image: string): Promise<{ values: number[]; raw: any }> {
+    async getValues(
+        image: string,
+    ): Promise<{ values: null | number[]; raw: any }> {
         //console.log('image', image);
         try {
             //const requestData = new FormData();
@@ -24,16 +26,17 @@ export class OcrSpace implements IOcrProvider {
 
             const values: number[] = [];
 
-            for (const parseResult of body.ParsedResults) {
-                for (const piece of parseResult.ParsedText.split(/\s+/m)) {
-                    if (/^[0-9]+(,[0-9]+)?$/g.test(piece)) {
-                        values.push(Number.parseFloat(piece.replace(',', '.')));
+            if (body.ParsedResults) {
+                for (const parseResult of body.ParsedResults) {
+                    for (const piece of parseResult.ParsedText.split(/\s+/m)) {
+                        if (/^[0-9]+(,[0-9]+)?$/g.test(piece)) {
+                            values.push(
+                                Number.parseFloat(piece.replace(',', '.')),
+                            );
+                        }
                     }
                 }
             }
-
-            //const text = body.ParsedResults[0].ParsedText;
-            // TODO: Detect text
 
             return {
                 values,
@@ -41,7 +44,12 @@ export class OcrSpace implements IOcrProvider {
             };
         } catch (error) {
             console.error(error);
-            throw new Error(`Cannot scan image with OcrSpace.`);
+            /*throw new Error(`Cannot scan image with OcrSpace.`);*/
+
+            return {
+                values: null,
+                raw: error.message,
+            };
         }
     }
 }

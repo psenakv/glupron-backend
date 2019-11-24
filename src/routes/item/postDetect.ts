@@ -1,6 +1,7 @@
 import { ocrSpace } from './../../externalServices/ocr/OcrSpace';
 import { IResponse } from './../../tools/createRouteHandler';
 import { googleSpeech } from '../../externalServices/tts/GoogleSpeech';
+import { isNull } from 'util';
 
 export interface IPostDetectRequest {
     gluckometerImage: string;
@@ -10,7 +11,7 @@ export interface IPostDetectRequest {
 
 export interface IPostDetectResponse
     extends IResponse<{
-        glucoseValue: number;
+        glucoseValue: number | null;
         speech: {
             text: string;
             ssml: string;
@@ -28,14 +29,19 @@ export async function postDetect(
 ): Promise<IPostDetectResponse> {
     const { values, raw } = await ocrSpace.getValues(request.gluckometerImage);
 
-    let text: string = 'Chyba';
+    let text: string = 'Nastala chyba, zkuste prosím vyfotit glukometr znovu.';
 
-    if (values.length > 1) {
+    let glucoseValue: number | null = null;
+
+    if (isNull(values)) {
+        text = text; // With unknown error;
+    } else if (values.length > 1) {
         text = `Nalezeno více než 1 text. A to ${values.join(' a ')}`;
     } else if (values.length === 0) {
         text = `Naskenujte znovu`;
     } else if (values.length === 1) {
-        text = `${values[0]} je hodnota vaší glykémie.`;
+        glucoseValue = values[0];
+        text = `${glucoseValue} je hodnota vaší glykémie.`;
     }
 
     const ssml = `
@@ -53,7 +59,7 @@ export async function postDetect(
 
     return {
         data: {
-            glucoseValue: 15.9,
+            glucoseValue,
             speech: {
                 text,
                 ssml,

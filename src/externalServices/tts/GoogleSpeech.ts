@@ -35,7 +35,7 @@ export class GoogleSpeech implements ISpeechProvider {
 
             return `data:audio/mp3;base64,${audioContent}`;
         } catch (error) {
-            console.error(error);
+            console.error(error);	
             throw new Error(
                 `Cannot convert ssml into mp3 via GoogleSpeechProvider.`,
             );

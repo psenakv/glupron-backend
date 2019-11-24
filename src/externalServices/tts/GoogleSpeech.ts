@@ -6,15 +6,19 @@ import * as fetch from 'isomorphic-fetch';
 /**
  * This class provides access to Google cloud TTS service
  */
-export class GoogleSpeech implements ISpeechProvider {
-    async getAudio(ssml: string): Promise<string> {
+export class GoogleSpeech /*implements ISpeechProvider*/ {
+    async getAudio(ssml: string, language: string): Promise<string> {
         try {
             const requestData = {
                 input: { ssml },
 
                 voice: {
                     // todo to config //choose from https://cloud.google.com/text-to-speech/docs/voices
-                    languageCode: 'cs-CZ-Wavenet-A',
+                    //languageCode: 'cs-CZ-Standard-A',
+                    languageCode:
+                        language === 'cz'
+                            ? 'cs-CZ-Wavenet-A'
+                            : 'en-GB-Wavenet-B',
                 },
                 audioConfig: {
                     audioEncoding: 'MP3',

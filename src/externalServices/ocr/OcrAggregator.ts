@@ -3,6 +3,8 @@ import { ocrGoogle } from './OcrGoogle';
 import { ocrSpace } from './OcrSpace';
 
 export class OcrAggregator implements IOcrProvider {
+    private strategy = 'OR';
+
     async getValues(
         image: string,
     ): Promise<{ values: null | number[]; raw: any[] }> {
@@ -16,7 +18,9 @@ export class OcrAggregator implements IOcrProvider {
             raw = [...raw, ..._raw];
 
             if (!_values || !values) {
-                values = null;
+                if (this.strategy === 'AND') values = null;
+                else if (this.strategy === 'OR')
+                    values = [...(values || []), ...(values || [])];
             } else {
                 values = [...values, ..._values];
             }
@@ -25,6 +29,11 @@ export class OcrAggregator implements IOcrProvider {
         if (values) {
             values = values.filter((v, i, a) => a.indexOf(v) === i);
         }
+
+        if (this.strategy === 'OR')
+            if (values && values.length > 1) {
+                values = [values[0]];
+            }
 
         return { values, raw };
     }

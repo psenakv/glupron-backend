@@ -42,12 +42,16 @@ export async function postDetect(
     if (isNull(values)) {
         text = text; // With unknown error;
     } else if (values.length > 1) {
-        text = `Nalezeno více než 1 text. A to ${values.join(' a ')}`;
+        if (request.language == 'cs')
+            text = `Nalezeno více než 1 text. A to ${values.join(' a ')}`;
+        if (request.language == 'en')
+            text = `Found more then one text - ${values.join(' and ')}`;
     } else if (values.length === 0) {
-        text = `Naskenujte znovu`;
+        if (request.language == 'cs') text = `Naskenujte znovu`;
+        if (request.language == 'en') text = `Scan once again please`;
     } else if (values.length === 1) {
         glucoseValue = values[0];
-        text = `${glucoseValue} je hodnota vaší glykémie.`;
+        text = `${glucoseValue}`; // je hodnota vaší glykémie.
     }
 
     const ssml = `
@@ -62,7 +66,9 @@ export async function postDetect(
     </speak>
     `.trim();
 
-    const mp3 = request.noSpeech ? '' : await googleSpeech.getAudio(ssml);
+    const mp3 = request.noSpeech
+        ? ''
+        : await googleSpeech.getAudio(ssml, request.language);
 
     return {
         data: {
